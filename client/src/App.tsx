@@ -4,6 +4,16 @@ import { AuthProvider } from "./context/AuthContext";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
+import Navbar from "./components/Navbar";
+import FloatingChatButton from "./components/FloatingChatButton";
+
+// Add a WithNavbar wrapper component (inside App.tsx, above the App function)
+const WithNavbar = ({ children }: { children: React.ReactNode }) => (
+  <>
+    <Navbar />
+    {children}
+  </>
+);
 
 export default function App() {
   return (
@@ -11,10 +21,15 @@ export default function App() {
       <AuthProvider>
         <Toaster position="top-center" />
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={
+            <WithNavbar>
+            <HomePage />
+            </WithNavbar>
+            } />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
         </Routes>
+        <FloatingChatButton/>
       </AuthProvider>
     </BrowserRouter>
   );
