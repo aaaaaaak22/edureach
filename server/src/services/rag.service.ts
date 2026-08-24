@@ -48,7 +48,7 @@ const getVectorStore = async () => {
 
   return new MongoDBAtlasVectorSearch(getEmbeddings(), {
     collection: collection as any,
-    indexName: "edureach_vector_index",
+    indexName: "edureachvectorindex",
     textKey: "text",
     embeddingKey: "embedding",
   });
@@ -66,6 +66,15 @@ export const initializeKnowledgeBase = async (): Promise<void> => {
   const docWithEmbedding = await collection.findOne({
     embedding: { $exists: true, $not: { $size: 0 } },
   });
+
+  if (docWithEmbedding) {
+  console.log(
+    "🔢 Existing embedding dimensions:",
+    Array.isArray(docWithEmbedding.embedding)
+      ? docWithEmbedding.embedding.length
+      : "not an array"
+  );
+}
 
   if (docWithEmbedding) {
     const count = await collection.countDocuments();
@@ -115,7 +124,7 @@ export const initializeKnowledgeBase = async (): Promise<void> => {
   // EMBED + STORE
   const vectorStore = new MongoDBAtlasVectorSearch(embeddings, {
     collection: collection as any,
-    indexName: "edureach_vector_index",
+    indexName: "edureachvectorindex",
     textKey: "text",
     embeddingKey: "embedding",
   });
@@ -141,6 +150,16 @@ const createRetrieveTool = (vectorStore: MongoDBAtlasVectorSearch) => {
   return tool(
     async ({ query }: { query: string }) => {
       const retrievedDocs = await vectorStore.similaritySearch(query, 3);
+
+      console.log("🔎 RAG Query:", query);
+      console.log("📚 Retrieved documents:", retrievedDocs.length);
+
+      retrievedDocs.forEach((doc, index) => {
+      console.log(`--- Document ${index + 1} ---`);
+      console.log(doc.pageContent);
+      });
+
+
       return retrievedDocs
         .map((doc) => `Source: ${doc.metadata.source}\nContent: ${doc.pageContent}`)
         .join("\n\n");
@@ -163,7 +182,7 @@ export const getRAGResponse = async (question: string): Promise<string> => {
     const retrieve = createRetrieveTool(vectorStore);
 
     const model = new ChatGoogleGenerativeAI({
-      model: "gemini-2.5-flash",
+      model: "gemini-3.6-flash",
       temperature: 0.7,
     });
 

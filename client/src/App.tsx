@@ -10,7 +10,7 @@ import FloatingChatButton from "./components/FloatingChatButton";
 // Add a WithNavbar wrapper component (inside App.tsx, above the App function)
 const WithNavbar = ({ children }: { children: React.ReactNode }) => (
   <>
-    <Navbar />
+    <Navbar /> 
     {children}
   </>
 );
